@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+*.Rproj
+data-raw/*gz
+data-raw/*html
+data-raw/*html
+data-raw/*RDS
+data-raw/*rda
+
