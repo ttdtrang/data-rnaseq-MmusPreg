@@ -7,8 +7,8 @@ Authors@R:
            role = c("aut", "cre"),
            email = "first.last@example.com",
            comment = c(ORCID = "0000-0002-4219-2990"))
-Description: A comprehensive examination of dynamic gene expression changes in the mouse brain during pregnancy and the postpartum period 
+Description: A comprehensive examination of dynamic gene expression changes in the mouse brain during pregnancy and the postpartum period  (PMID: 26596646)
 Depends: R (>= 3.5.3)
-License: What license is it under?
+License: CC-BY
 Encoding: UTF-8
 LazyData: true
