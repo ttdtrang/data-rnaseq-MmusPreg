@@ -2,7 +2,7 @@
 
 ## Sources
 
-  * Experimental data were generated in SEQC Toxicogenomics project. Original citation: Ray S et al., "An Examination of Dynamic Gene Expression Changes in the Mouse Brain During Pregnancy and the Postpartum Period.", G3 (Bethesda), 2015 Nov 23;6(1):221-33 (PMID: [26596646](https://www.ncbi.nlm.nih.gov/pubmed/26596646)
+  * Experimental data were generated in SEQC Toxicogenomics project. Original citation: Ray S et al., "An Examination of Dynamic Gene Expression Changes in the Mouse Brain During Pregnancy and the Postpartum Period.", G3 (Bethesda), 2015 Nov 23;6(1):221-33 (PMID: [26596646](https://www.ncbi.nlm.nih.gov/pubmed/26596646))
   * Processing:
     * Sequencing reads were downloaded from SRA, at [PRJNA289455](https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA289455)
     * Re-processed by first aligning on Mouse genome GRCm38.p6 + 92 ERCC sequences, annotated by Gencode (m25), using STAR 2.7.1a, and then quantified by RSEM for abundance levels at gene and transcript levels.
