@@ -1,0 +1,171 @@
+---
+title: "Create data package"
+author: "Trang Tran"
+date: "March 22, 2020"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(magrittr)
+library(ggplot2)
+library(Biobase)
+
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+## Download count matrices and meta data, set environment variable 'DBDIR'
+
+```{r,eval = FALSE}
+Sys.setenv('DBDIR' = '.')
+```
+
+
+## Gene-level `ExpressionSet`
+
+### Assay data
+
+```{r}
+gene.counts = readRDS(file.path(Sys.getenv('DBDIR'), 'matrix.gene.expected_count.RDS'))
+gene.tpm = readRDS(file.path(Sys.getenv('DBDIR'), 'matrix.gene.tpm.RDS'))
+gene.assayData <- new.env()
+assign('exprs', gene.counts, envir = gene.assayData) # exprs is required
+assign('expected_count', gene.counts, envir = gene.assayData)
+assign('tpm', gene.tpm, envir = gene.assayData)
+ExpressionSet(assayData = gene.assayData)
+```
+
+
+### Phenotypic data
+
+```{r}
+metadata = read.table(file.path(Sys.getenv('DBDIR'),
+                                'PRJNA289455_metadata_cleaned.tsv'), sep = '\t', header = TRUE)
+
+
+```
+
+```{r}
+starLog = read.table(file.path(Sys.getenv('DBDIR'),
+                               'starLog.final.tsv'), sep = '\t',header=TRUE)
+meta1 = data.frame(t(starLog[,-c(1,2)])) %>%
+    set_colnames(paste0('starAlignment.',starLog[[1]])) %>%
+    set_rownames(colnames(starLog)[-c(1,2)])
+meta1$BiosampleId = rownames(meta1)
+str(meta1)
+```
+
+```{r}
+libnames <- colnames(gene.assayData$exprs) %>% as.character()
+allMeta <- data.frame('BiosampleId' = libnames) %>%
+    plyr::join(y = metadata, by = 'BiosampleId', type = 'left')  %>%
+    plyr::join(y = meta1, by = 'BiosampleId', type = 'left') %>%
+    set_rownames(libnames)
+colDescription = colnames(allMeta)
+colDescription[grepl('starAlignment', colnames(allMeta))] = starLog[[2]]
+phenoData <-
+    Biobase::AnnotatedDataFrame(data = allMeta, varMetadata = data.frame('labelDescription' = colDescription, row.names = colnames(allMeta)))
+phenoData@varMetadata
+```
+
+Making sure sample order is preserved
+
+```{r}
+all(phenoData@data$BiosampleId == colnames(gene.counts))
+```
+
+### Annotations and features
+
+```{r}
+feature_attrs = read.table(file.path(Sys.getenv('DBDIR'),
+                                     'feature_attrs.genes.tsv'),
+                           sep = '\t', header=TRUE, colClasses = 'character')
+gene.featureData <- data.frame('Geneid' = rownames(gene.assayData$exprs)) %>%
+    plyr::join(y = feature_attrs, by = 'Geneid', type = 'left') %>%
+    set_names(c('ID', 'Strand', 'Length')) %>%
+    unique() 
+rownames(gene.featureData) = gene.featureData$ID
+gene.featureData = gene.featureData %>%
+    Biobase::AnnotatedDataFrame(data = ., varMetadata = data.frame('labelDescription' = colnames(.), row.names = colnames(.)))
+gene.featureData
+```
+
+### Experiment description
+
+```{r}
+experimentData <- new("MIAME",
+                      lab = "Arbeitman lab",
+                      contact = "michelle.arbeitman@med.fsu.edu",
+                      title = "A comprehensive examination of dynamic gene expression changes in the mouse brain during pregnancy and the postpartum period",
+                      abstract = "",
+                      other = list(
+                          citation = "Ray S, Tzeng RY, DiCarlo LM, Bundy JL et al. An Examination of Dynamic Gene Expression Changes in the Mouse Brain During Pregnancy and the Postpartum Period. G3 (Bethesda) 2015 Nov 23;6(1):221-33. PMID: 26596646"
+                      )
+                      )
+```
+
+### Assembling an `ExpressionSet`
+
+```{r}
+mpreg.rnaseq.gene <- ExpressionSet(assayData = gene.assayData,
+                             phenoData = phenoData,
+                             experimentData = experimentData,
+                             featureData = gene.featureData,
+                             annotation = 'Gencode mouse genome m25 (GRCm38.p6) + ERCC-92'
+                             )
+```
+
+## Transcript-level `ExpressionSet`
+
+### Assay data
+
+```{r}
+transcript.counts = readRDS(file.path(Sys.getenv('DBDIR'), 'matrix.transcripts.expected_count.RDS'))
+transcript.tpm = readRDS(file.path(Sys.getenv('DBDIR'), 'matrix.transcripts.tpm.RDS'))
+transcript.assayData <- new.env()
+assign('exprs', transcript.counts, envir = transcript.assayData) # exprs is required
+assign('expected_count', transcript.counts, envir = transcript.assayData)
+assign('tpm', transcript.tpm, envir = transcript.assayData)
+ExpressionSet(assayData = transcript.assayData)
+```
+
+### Phenotypic data
+
+Same as above
+
+### Annotations and features
+
+```{r}
+feature_attrs = read.table(file.path(Sys.getenv('DBDIR'), 'feature_attrs.transcripts.tsv'), sep = '\t', header=TRUE, colClasses = 'character')
+transcript.featureData <- data.frame('transcript_id' = rownames(transcript.assayData$exprs)) %>%
+    plyr::join(y = feature_attrs[, c('transcript_id', 'gene_id', 'length', 'effective_length')], by = 'transcript_id', type = 'left') %>%
+    set_names(c('ID', 'GeneId', 'Length', 'EffectiveLength'))
+rownames(transcript.featureData) = transcript.featureData$ID
+transcript.featureData = transcript.featureData %>%
+    Biobase::AnnotatedDataFrame(data = ., varMetadata = data.frame('labelDescription' = colnames(.), row.names = colnames(.)))
+```
+
+### Experiment description
+
+Same as above
+
+### Assembling an `ExpressionSet`
+
+```{r}
+mpreg.rnaseq.transcript <- ExpressionSet(assayData = transcript.assayData,
+                             phenoData = phenoData,
+                             experimentData = experimentData,
+                             featureData = transcript.featureData,
+                             annotation = 'Gencode mouse genome m25 (GRCm38.p6) + ERCC-92'
+                             )
+```
+
+## Writing data sets
+
+```{r,eval=FALSE}
+usethis::use_data(mpreg.rnaseq.gene,internal = FALSE, overwrite = TRUE)
+usethis::use_data(mpreg.rnaseq.transcript,internal = FALSE, overwrite = TRUE)
+```
+
