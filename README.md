@@ -23,7 +23,7 @@ The package includes 2 data sets, one for transcript-level counts/TPM and anothe
 ## Steps to re-produce data curation
 
 1. `cd data-raw`
-2. Download all necessary raw data files, which includes
+2. Download all necessary raw data files which include
 ```
 3.0M	feature_attrs.genes.tsv
 7.0M	feature_attrs.transcripts.tsv
