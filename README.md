@@ -23,7 +23,20 @@ The package includes 2 data sets, one for transcript-level counts/TPM and anothe
 ## Steps to re-produce data curation
 
 1. `cd data-raw`
-2. Download all necessary raw data files.
+2. Download all necessary raw data files, which includes
+```
+3.0M	feature_attrs.genes.tsv
+7.0M	feature_attrs.transcripts.tsv
+8.0K	featureCounts-summary.genes.tsv
+8.0K	featureCounts-summary.transcripts.tsv
+5.2M	matrix.gene.expected_count.RDS
+4.2M	matrix.gene.featureCounts.RDS
+5.4M	matrix.gene.tpm.RDS
+17M	matrix.transcripts.expected_count.RDS
+15M	matrix.transcripts.tpm.RDS
+24K	PRJNA289455_metadata_cleaned.tsv
+20K	starLog.final.tsv
+```
 3. Set the environment variable `DBDIR` to point to the path containing said files
 4. Run the R notebook `make-data-package.Rmd` to assemble parts into `ExpressionSet` objects.
 
