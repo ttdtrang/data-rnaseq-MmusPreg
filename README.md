@@ -1,4 +1,4 @@
-# Data package for transcriptomic profiles from mouse brain regions during pregnancy
+# Data package for transcriptomic profiles from mouse brain regions during pregnancy and postpartum period
 
 ## Sources
 
